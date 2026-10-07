@@ -4,7 +4,12 @@
   "description": "The grading rules behind Traivo AI's public scorecard, as a spec, a pure TypeScript grader, golden vectors and a CLI that checks the published scorecard.",
   "license": "MIT",
   "type": "module",
-  "homepage": "https://dapp.traivo.xyz",
+  "homepage": "https://traivo.xyz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/traivoxyz/traivo-scorecard.git"
+  },
+  "bugs": "https://github.com/traivoxyz/traivo-scorecard/issues",
   "keywords": [
     "traivo",
     "scorecard",
