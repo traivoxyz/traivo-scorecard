@@ -23,4 +23,6 @@ export {
   type Report,
   type Severity,
 } from "./check.js";
+export { DEFAULT_BASE_URL, fetchScorecard, parseScorecard, scorecardUrl, type FetchOptions } from "./fetch.js";
 export { SPEC_VERSION, VERSION } from "./version.js";
+export { run, type Io } from "./run.js";
