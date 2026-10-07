@@ -199,3 +199,13 @@ close the call; that needs the price path (§2) and is out of scope for v0.1 of 
 ## 10. Versioning
 
 This is spec v1. Any change to §1.1, §2, §4, §5 or §7 gets a new spec version and new golden vectors in this repo.
+
+Changes that leave the grading rule untouched keep the version:
+
+- 2026-10-07: `horizon_s` is published with every call (§1, §8).
+- 2026-10-07: price precedence (§3) now puts the routed on-chain price above the Hyperliquid mid, so ETH and other
+  routed tokens are graded at the on-chain price they are entered at. Before this, the Hyperliquid mid won for every
+  symbol Hyperliquid lists.
+- 2026-10-07: on-chain prices are read on Ethereum mainnet. `block` is an Ethereum block number, sizes and quotes are
+  in USDC, and tokenized stocks are Ondo Global Markets tokens (§1, §2, §3). The grader still samples about once a
+  minute, and the grading rule (§4, §5) is unchanged.
