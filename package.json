@@ -1,0 +1,54 @@
+{
+  "name": "@traivo/scorecard",
+  "version": "0.1.0",
+  "description": "The grading rules behind Traivo AI's public scorecard, as a spec, a pure TypeScript grader, golden vectors and a CLI that checks the published scorecard.",
+  "license": "MIT",
+  "type": "module",
+  "homepage": "https://dapp.traivo.xyz",
+  "keywords": [
+    "traivo",
+    "scorecard",
+    "trading",
+    "grading",
+    "golden-vectors",
+    "ethereum",
+    "tokenized-stocks"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./vectors/*": "./vectors/*"
+  },
+  "bin": {
+    "traivo-scorecard": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "vectors",
+    "SPEC.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "prettier --check .",
+    "format": "prettier --write .",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "prettier": "^3.6.2",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
