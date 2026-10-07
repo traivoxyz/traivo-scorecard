@@ -1,0 +1,66 @@
+{
+  "spec": 1,
+  "description": "summarize(calls) golden vectors (SPEC §7). Counts compare exactly; winRate and avgReturnPct with an absolute tolerance of 1e-9. winRate is a fraction, not a percent.",
+  "tolerance": { "winRate": 1e-9, "avgReturnPct": 1e-9 },
+  "cases": [
+    {
+      "name": "empty",
+      "calls": [],
+      "expected": { "total": 0, "open": 0, "closed": 0, "wins": 0, "losses": 0, "winRate": null, "avgReturnPct": null }
+    },
+    {
+      "name": "only_open",
+      "note": "Open calls never count toward winRate or avgReturnPct.",
+      "calls": [
+        { "status": "open", "return_pct": null },
+        { "status": "open", "return_pct": null }
+      ],
+      "expected": { "total": 2, "open": 2, "closed": 0, "wins": 0, "losses": 0, "winRate": null, "avgReturnPct": null }
+    },
+    {
+      "name": "mixed",
+      "calls": [
+        { "status": "win", "return_pct": 6 },
+        { "status": "loss", "return_pct": -3 },
+        { "status": "win", "return_pct": 2 },
+        { "status": "loss", "return_pct": 0 },
+        { "status": "open", "return_pct": null }
+      ],
+      "expected": { "total": 5, "open": 1, "closed": 4, "wins": 2, "losses": 2, "winRate": 0.5, "avgReturnPct": 1.25 }
+    },
+    {
+      "name": "missing_return_counts_as_zero",
+      "note": "Mirrors the live summary: a closed call with return_pct null adds 0 to the average.",
+      "calls": [
+        { "status": "win", "return_pct": 9 },
+        { "status": "loss", "return_pct": null },
+        { "status": "loss", "return_pct": -3 }
+      ],
+      "expected": {
+        "total": 3,
+        "open": 0,
+        "closed": 3,
+        "wins": 1,
+        "losses": 2,
+        "winRate": 0.3333333333333333,
+        "avgReturnPct": 2
+      }
+    },
+    {
+      "name": "all_losses",
+      "calls": [
+        { "status": "loss", "return_pct": -3.0000000000000027 },
+        { "status": "loss", "return_pct": -1.0000000000000009 }
+      ],
+      "expected": {
+        "total": 2,
+        "open": 0,
+        "closed": 2,
+        "wins": 0,
+        "losses": 2,
+        "winRate": 0,
+        "avgReturnPct": -2.000000000000002
+      }
+    }
+  ]
+}

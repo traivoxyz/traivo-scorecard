@@ -1,0 +1,454 @@
+{
+  "spec": 1,
+  "description": "grade(call, prices) golden vectors. Times are Unix seconds; createdAt 1790000000, horizon 604800 s (7 days), so the call expires at 1790604800. Compare status, reason, resolvedAt and exit exactly, returnPct with an absolute tolerance of 1e-9.",
+  "tolerance": { "returnPct": 1e-9 },
+  "cases": [
+    {
+      "name": "buy_tp_first",
+      "note": "Target reached before stop: win by tp at the sampled price.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790000060, "price": 101 },
+        { "t": 1790000120, "price": 103 },
+        { "t": 1790000180, "price": 106.2 },
+        { "t": 1790000240, "price": 90 }
+      ],
+      "expected": {
+        "status": "win",
+        "reason": "tp",
+        "resolvedAt": 1790000180,
+        "exit": 106.2,
+        "returnPct": 6.2000000000000055
+      }
+    },
+    {
+      "name": "buy_sl_first",
+      "note": "Stop reached before target: loss by sl.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790000060, "price": 99 },
+        { "t": 1790000120, "price": 96.5 }
+      ],
+      "expected": {
+        "status": "loss",
+        "reason": "sl",
+        "resolvedAt": 1790000120,
+        "exit": 96.5,
+        "returnPct": -3.500000000000003
+      }
+    },
+    {
+      "name": "buy_sl_then_target_later",
+      "note": "First event is final: a later rally above target does not reopen the call.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790000060, "price": 98 },
+        { "t": 1790000120, "price": 96.9 },
+        { "t": 1790000180, "price": 107 }
+      ],
+      "expected": {
+        "status": "loss",
+        "reason": "sl",
+        "resolvedAt": 1790000120,
+        "exit": 96.9,
+        "returnPct": -3.0999999999999917
+      }
+    },
+    {
+      "name": "buy_exact_target",
+      "note": "Touching the target counts (>=).",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [{ "t": 1790000060, "price": 106 }],
+      "expected": {
+        "status": "win",
+        "reason": "tp",
+        "resolvedAt": 1790000060,
+        "exit": 106,
+        "returnPct": 6.000000000000005
+      }
+    },
+    {
+      "name": "buy_exact_stop",
+      "note": "Touching the stop counts (<=).",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [{ "t": 1790000060, "price": 97 }],
+      "expected": {
+        "status": "loss",
+        "reason": "sl",
+        "resolvedAt": 1790000060,
+        "exit": 97,
+        "returnPct": -3.0000000000000027
+      }
+    },
+    {
+      "name": "buy_gap_through_stop",
+      "note": "A gap through the stop closes at the sampled price, not at the stop.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [{ "t": 1790000060, "price": 80 }],
+      "expected": {
+        "status": "loss",
+        "reason": "sl",
+        "resolvedAt": 1790000060,
+        "exit": 80,
+        "returnPct": -19.999999999999996
+      }
+    },
+    {
+      "name": "buy_expiry_win",
+      "note": "Neither level reached; the first sample at the horizon closes it. Return > 0 is a win. The boundary is inclusive.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790000060, "price": 101 },
+        { "t": 1790604799, "price": 102.5 },
+        { "t": 1790604800, "price": 102 },
+        { "t": 1790604860, "price": 90 }
+      ],
+      "expected": {
+        "status": "win",
+        "reason": "expiry",
+        "resolvedAt": 1790604800,
+        "exit": 102,
+        "returnPct": 2.0000000000000018
+      }
+    },
+    {
+      "name": "buy_expiry_loss",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790300000, "price": 98 },
+        { "t": 1790604800, "price": 99 }
+      ],
+      "expected": {
+        "status": "loss",
+        "reason": "expiry",
+        "resolvedAt": 1790604800,
+        "exit": 99,
+        "returnPct": -1.0000000000000009
+      }
+    },
+    {
+      "name": "buy_expiry_no_move",
+      "note": "Return of exactly 0 at expiry is a loss: only a strictly positive return wins.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [{ "t": 1790604800, "price": 100 }],
+      "expected": { "status": "loss", "reason": "expiry", "resolvedAt": 1790604800, "exit": 100, "returnPct": 0 }
+    },
+    {
+      "name": "buy_tp_on_expiry_sample",
+      "note": "When the expiry sample also reaches the target, the reason is tp, not expiry.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [{ "t": 1790604800, "price": 107 }],
+      "expected": {
+        "status": "win",
+        "reason": "tp",
+        "resolvedAt": 1790604800,
+        "exit": 107,
+        "returnPct": 7.000000000000006
+      }
+    },
+    {
+      "name": "buy_sl_on_expiry_sample",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [{ "t": 1790604900, "price": 95 }],
+      "expected": {
+        "status": "loss",
+        "reason": "sl",
+        "resolvedAt": 1790604900,
+        "exit": 95,
+        "returnPct": -5.000000000000004
+      }
+    },
+    {
+      "name": "buy_expiry_first_usable_sample_after_horizon",
+      "note": "Missing prices are skipped, so the call closes at the first usable sample after the horizon.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790604800, "price": null },
+        { "t": 1790604860, "price": 0 },
+        { "t": 1790605400, "price": 102 }
+      ],
+      "expected": {
+        "status": "win",
+        "reason": "expiry",
+        "resolvedAt": 1790605400,
+        "exit": 102,
+        "returnPct": 2.0000000000000018
+      }
+    },
+    {
+      "name": "buy_open_before_horizon",
+      "note": "No level reached and the horizon has not passed: still open, every result field null.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790000060, "price": 101 },
+        { "t": 1790604799, "price": 105.9 }
+      ],
+      "expected": { "status": "open", "reason": null, "resolvedAt": null, "exit": null, "returnPct": null }
+    },
+    {
+      "name": "buy_empty_path",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [],
+      "expected": { "status": "open", "reason": null, "resolvedAt": null, "exit": null, "returnPct": null }
+    },
+    {
+      "name": "buy_unusable_prices_skipped",
+      "note": "null, zero and negative prices are skipped; the next usable sample is graded.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790000060, "price": null },
+        { "t": 1790000120, "price": 0 },
+        { "t": 1790000180, "price": -1 },
+        { "t": 1790000240, "price": 106.2 }
+      ],
+      "expected": {
+        "status": "win",
+        "reason": "tp",
+        "resolvedAt": 1790000240,
+        "exit": 106.2,
+        "returnPct": 6.2000000000000055
+      }
+    },
+    {
+      "name": "buy_samples_before_creation_ignored",
+      "note": "A sample before createdAt never applies; a sample at exactly createdAt does.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1789999940, "price": 200 },
+        { "t": 1790000000, "price": 96.5 }
+      ],
+      "expected": {
+        "status": "loss",
+        "reason": "sl",
+        "resolvedAt": 1790000000,
+        "exit": 96.5,
+        "returnPct": -3.500000000000003
+      }
+    },
+    {
+      "name": "buy_unsorted_path",
+      "note": "Samples are evaluated in time order whatever order they are given in.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790000180, "price": 106.2 },
+        { "t": 1790000060, "price": 96.5 }
+      ],
+      "expected": {
+        "status": "loss",
+        "reason": "sl",
+        "resolvedAt": 1790000060,
+        "exit": 96.5,
+        "returnPct": -3.500000000000003
+      }
+    },
+    {
+      "name": "buy_wick_between_samples_not_seen",
+      "note": "Only sampled prices count. A wick to the stop between these samples is invisible, so the call runs to expiry.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790000060, "price": 101 },
+        { "t": 1790000120, "price": 104 },
+        { "t": 1790604800, "price": 103 }
+      ],
+      "expected": {
+        "status": "win",
+        "reason": "expiry",
+        "resolvedAt": 1790604800,
+        "exit": 103,
+        "returnPct": 3.0000000000000027
+      }
+    },
+    {
+      "name": "buy_float_target_not_reached",
+      "note": "Comparisons are exact on doubles. levelsFor(buy, 182.4, 3, 6) stores target 193.34400000000002, so a sample of 193.344 does not reach it.",
+      "call": {
+        "side": "buy",
+        "entry": 182.4,
+        "stop": 176.928,
+        "target": 193.34400000000002,
+        "createdAt": 1790000000,
+        "horizonS": 604800
+      },
+      "prices": [
+        { "t": 1790000060, "price": 193.344 },
+        { "t": 1790000120, "price": 193.35 }
+      ],
+      "expected": {
+        "status": "win",
+        "reason": "tp",
+        "resolvedAt": 1790000120,
+        "exit": 193.35,
+        "returnPct": 6.003289473684204
+      }
+    },
+    {
+      "name": "tie_both_levels_in_one_sample",
+      "note": "Tie rule: if one sample reaches both levels the grader checks tp first, so it is a win by tp. Only possible with inverted levels (here a buy with stop above target).",
+      "call": { "side": "buy", "entry": 100, "stop": 105, "target": 95, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [{ "t": 1790000060, "price": 100 }],
+      "expected": { "status": "win", "reason": "tp", "resolvedAt": 1790000060, "exit": 100, "returnPct": 0 }
+    },
+    {
+      "name": "sell_tp_first",
+      "note": "A sell wins when the price falls to the target. Return is inverted: positive when the price falls.",
+      "call": { "side": "sell", "entry": 100, "stop": 103, "target": 94, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790000060, "price": 98 },
+        { "t": 1790000120, "price": 93.8 }
+      ],
+      "expected": {
+        "status": "win",
+        "reason": "tp",
+        "resolvedAt": 1790000120,
+        "exit": 93.8,
+        "returnPct": 6.2000000000000055
+      }
+    },
+    {
+      "name": "sell_sl_first",
+      "call": { "side": "sell", "entry": 100, "stop": 103, "target": 94, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790000060, "price": 101 },
+        { "t": 1790000120, "price": 103.5 },
+        { "t": 1790000180, "price": 90 }
+      ],
+      "expected": {
+        "status": "loss",
+        "reason": "sl",
+        "resolvedAt": 1790000120,
+        "exit": 103.5,
+        "returnPct": -3.499999999999992
+      }
+    },
+    {
+      "name": "sell_exact_target",
+      "call": { "side": "sell", "entry": 100, "stop": 103, "target": 94, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [{ "t": 1790000060, "price": 94 }],
+      "expected": {
+        "status": "win",
+        "reason": "tp",
+        "resolvedAt": 1790000060,
+        "exit": 94,
+        "returnPct": 6.000000000000005
+      }
+    },
+    {
+      "name": "sell_exact_stop",
+      "call": { "side": "sell", "entry": 100, "stop": 103, "target": 94, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [{ "t": 1790000060, "price": 103 }],
+      "expected": {
+        "status": "loss",
+        "reason": "sl",
+        "resolvedAt": 1790000060,
+        "exit": 103,
+        "returnPct": -3.0000000000000027
+      }
+    },
+    {
+      "name": "sell_gap_through_stop",
+      "call": { "side": "sell", "entry": 100, "stop": 103, "target": 94, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [{ "t": 1790000060, "price": 120 }],
+      "expected": {
+        "status": "loss",
+        "reason": "sl",
+        "resolvedAt": 1790000060,
+        "exit": 120,
+        "returnPct": -19.999999999999996
+      }
+    },
+    {
+      "name": "sell_expiry_win",
+      "call": { "side": "sell", "entry": 100, "stop": 103, "target": 94, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790000060, "price": 95.5 },
+        { "t": 1790604800, "price": 99 }
+      ],
+      "expected": {
+        "status": "win",
+        "reason": "expiry",
+        "resolvedAt": 1790604800,
+        "exit": 99,
+        "returnPct": 1.0000000000000009
+      }
+    },
+    {
+      "name": "sell_expiry_loss",
+      "call": { "side": "sell", "entry": 100, "stop": 103, "target": 94, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [{ "t": 1790604800, "price": 101 }],
+      "expected": {
+        "status": "loss",
+        "reason": "expiry",
+        "resolvedAt": 1790604800,
+        "exit": 101,
+        "returnPct": -1.0000000000000009
+      }
+    },
+    {
+      "name": "sell_expiry_no_move",
+      "call": { "side": "sell", "entry": 100, "stop": 103, "target": 94, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [{ "t": 1790604800, "price": 100 }],
+      "expected": { "status": "loss", "reason": "expiry", "resolvedAt": 1790604800, "exit": 100, "returnPct": 0 }
+    },
+    {
+      "name": "sell_open",
+      "call": { "side": "sell", "entry": 100, "stop": 103, "target": 94, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [{ "t": 1790000060, "price": 95.5 }],
+      "expected": { "status": "open", "reason": null, "resolvedAt": null, "exit": null, "returnPct": null }
+    },
+    {
+      "name": "sell_unreachable_target",
+      "note": "levelsFor(sell, 50, 50, 200) gives target -50: no price reaches it, so the call can only close by stop or expiry.",
+      "call": { "side": "sell", "entry": 50, "stop": 75, "target": -50, "createdAt": 1790000000, "horizonS": 604800 },
+      "prices": [
+        { "t": 1790000060, "price": 0.01 },
+        { "t": 1790604800, "price": 40 }
+      ],
+      "expected": {
+        "status": "win",
+        "reason": "expiry",
+        "resolvedAt": 1790604800,
+        "exit": 40,
+        "returnPct": 19.999999999999996
+      }
+    },
+    {
+      "name": "default_horizon",
+      "note": "horizonS omitted: the 7-day default applies.",
+      "call": { "side": "buy", "entry": 100, "stop": 97, "target": 106, "createdAt": 1790000000 },
+      "prices": [
+        { "t": 1790604799, "price": 102 },
+        { "t": 1790604800, "price": 102 }
+      ],
+      "expected": {
+        "status": "win",
+        "reason": "expiry",
+        "resolvedAt": 1790604800,
+        "exit": 102,
+        "returnPct": 2.0000000000000018
+      }
+    },
+    {
+      "name": "short_horizon",
+      "note": "A custom horizon of 1 hour expires at createdAt + 3600.",
+      "call": {
+        "side": "sell",
+        "entry": 0.5,
+        "stop": 0.515,
+        "target": 0.47,
+        "createdAt": 1790000000,
+        "horizonS": 3600
+      },
+      "prices": [
+        { "t": 1790003599, "price": 0.49 },
+        { "t": 1790003600, "price": 0.48 }
+      ],
+      "expected": {
+        "status": "win",
+        "reason": "expiry",
+        "resolvedAt": 1790003600,
+        "exit": 0.48,
+        "returnPct": 4.0000000000000036
+      }
+    }
+  ]
+}

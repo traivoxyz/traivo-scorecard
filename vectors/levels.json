@@ -1,0 +1,41 @@
+{
+  "spec": 1,
+  "description": "levelsFor(side, entry, stopPct, tpPct) golden vectors (SPEC §1.1). Levels are stored as computed doubles, so compare exactly.",
+  "cases": [
+    {
+      "name": "buy_default_3_6",
+      "input": { "side": "buy", "entry": 100, "stopPct": 3, "tpPct": 6 },
+      "expected": { "stop": 97, "target": 106 }
+    },
+    {
+      "name": "sell_default_3_6",
+      "input": { "side": "sell", "entry": 100, "stopPct": 3, "tpPct": 6 },
+      "expected": { "stop": 103, "target": 94 }
+    },
+    {
+      "name": "buy_float_target",
+      "input": { "side": "buy", "entry": 182.4, "stopPct": 3, "tpPct": 6 },
+      "expected": { "stop": 176.928, "target": 193.34400000000002 }
+    },
+    {
+      "name": "sell_fractional_pcts",
+      "input": { "side": "sell", "entry": 3412.55, "stopPct": 2.5, "tpPct": 7.5 },
+      "expected": { "stop": 3497.86375, "target": 3156.6087500000003 }
+    },
+    {
+      "name": "buy_min_stop_max_tp",
+      "input": { "side": "buy", "entry": 0.0123, "stopPct": 0.2, "tpPct": 200 },
+      "expected": { "stop": 0.0122754, "target": 0.0369 }
+    },
+    {
+      "name": "buy_max_stop_min_tp",
+      "input": { "side": "buy", "entry": 250, "stopPct": 50, "tpPct": 0.2 },
+      "expected": { "stop": 125, "target": 250.5 }
+    },
+    {
+      "name": "sell_tp_over_100_is_unreachable",
+      "input": { "side": "sell", "entry": 50, "stopPct": 50, "tpPct": 200 },
+      "expected": { "stop": 75, "target": -50 }
+    }
+  ]
+}

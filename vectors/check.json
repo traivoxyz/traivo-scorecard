@@ -1,0 +1,1153 @@
+{
+  "spec": 1,
+  "description": "checkRow / checkScorecard golden vectors (SPEC §9). Rows are in the published snake_case shape, including horizon_s; block is an Ethereum mainnet block number or \"hyperliquid\" (informational, not graded). When a row lacks horizon_s the verifier falls back to options.horizonS, else 7 days; a published horizon_s always wins. expected.codes is the sorted list of issue codes; [] means consistent.",
+  "rows": [
+    {
+      "name": "ok_open",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "open",
+        "reason": null,
+        "resolved_at": null,
+        "exit": null,
+        "return_pct": null
+      },
+      "expected": {
+        "codes": []
+      }
+    },
+    {
+      "name": "ok_buy_tp",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "win",
+        "reason": "tp",
+        "resolved_at": 1790000180,
+        "exit": 106.2,
+        "return_pct": 6.2000000000000055
+      },
+      "expected": {
+        "codes": []
+      }
+    },
+    {
+      "name": "ok_sell_sl",
+      "row": {
+        "id": "s1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "TSLA",
+        "side": "sell",
+        "amount": 1,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 103,
+        "target": 94,
+        "horizon_s": 604800,
+        "status": "loss",
+        "reason": "sl",
+        "resolved_at": 1790000120,
+        "exit": 103.5,
+        "return_pct": -3.499999999999992
+      },
+      "expected": {
+        "codes": []
+      }
+    },
+    {
+      "name": "ok_expiry_win",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "win",
+        "reason": "expiry",
+        "resolved_at": 1790604800,
+        "exit": 102,
+        "return_pct": 2.0000000000000018
+      },
+      "expected": {
+        "codes": []
+      }
+    },
+    {
+      "name": "ok_expiry_no_move_is_loss",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "loss",
+        "reason": "expiry",
+        "resolved_at": 1790604800,
+        "exit": 100,
+        "return_pct": 0
+      },
+      "expected": {
+        "codes": []
+      }
+    },
+    {
+      "name": "ok_hyperliquid_priced",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "hyperliquid",
+        "symbol": "BTC",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": null,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "win",
+        "reason": "tp",
+        "resolved_at": 1790000060,
+        "exit": 106,
+        "return_pct": 6.000000000000005
+      },
+      "expected": {
+        "codes": []
+      }
+    },
+    {
+      "name": "legacy_row_uses_option_horizon",
+      "note": "Older payloads lack horizon_s; the verifier then falls back to options.horizonS (here 1 hour).",
+      "options": {
+        "horizonS": 3600
+      },
+      "row": {
+        "id": "s1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "TSLA",
+        "side": "sell",
+        "amount": 1,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 103,
+        "target": 94,
+        "status": "win",
+        "reason": "expiry",
+        "resolved_at": 1790003600,
+        "exit": 99,
+        "return_pct": 1.0000000000000009
+      },
+      "expected": {
+        "codes": []
+      }
+    },
+    {
+      "name": "return_mismatch",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "win",
+        "reason": "tp",
+        "resolved_at": 1790000180,
+        "exit": 106.2,
+        "return_pct": 7
+      },
+      "expected": {
+        "codes": ["return_mismatch"]
+      }
+    },
+    {
+      "name": "status_mismatch_expiry",
+      "note": "Expiry with a positive return must be a win.",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "loss",
+        "reason": "expiry",
+        "resolved_at": 1790604800,
+        "exit": 102,
+        "return_pct": 2.0000000000000018
+      },
+      "expected": {
+        "codes": ["status_mismatch"]
+      }
+    },
+    {
+      "name": "status_mismatch_sl_marked_win",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "win",
+        "reason": "sl",
+        "resolved_at": 1790000120,
+        "exit": 96.5,
+        "return_pct": -3.500000000000003
+      },
+      "expected": {
+        "codes": ["status_mismatch"]
+      }
+    },
+    {
+      "name": "reason_mismatch_expiry_past_target",
+      "note": "The expiry sample also reaches the target, so the reason must be tp.",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "win",
+        "reason": "expiry",
+        "resolved_at": 1790604800,
+        "exit": 107,
+        "return_pct": 7.000000000000006
+      },
+      "expected": {
+        "codes": ["reason_mismatch"]
+      }
+    },
+    {
+      "name": "not_closable_tp_below_target",
+      "note": "Exit 105 does not reach target 106 and the horizon has not passed.",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "win",
+        "reason": "tp",
+        "resolved_at": 1790000180,
+        "exit": 105,
+        "return_pct": 5.000000000000004
+      },
+      "expected": {
+        "codes": ["not_closable"]
+      }
+    },
+    {
+      "name": "not_closable_expiry_too_early",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "win",
+        "reason": "expiry",
+        "resolved_at": 1790000180,
+        "exit": 102,
+        "return_pct": 2.0000000000000018
+      },
+      "expected": {
+        "codes": ["not_closable"]
+      }
+    },
+    {
+      "name": "missing_result",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "win",
+        "reason": "tp",
+        "resolved_at": 1790000180,
+        "exit": null,
+        "return_pct": 6.2000000000000055
+      },
+      "expected": {
+        "codes": ["missing_result"]
+      }
+    },
+    {
+      "name": "open_has_result",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "open",
+        "reason": null,
+        "resolved_at": null,
+        "exit": 101,
+        "return_pct": null
+      },
+      "expected": {
+        "codes": ["open_has_result"]
+      }
+    },
+    {
+      "name": "resolved_before_created",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "win",
+        "reason": "tp",
+        "resolved_at": 1789999940,
+        "exit": 106.2,
+        "return_pct": 6.2000000000000055
+      },
+      "expected": {
+        "codes": ["resolved_before_created"]
+      }
+    },
+    {
+      "name": "bad_levels_inverted_buy",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 105,
+        "target": 95,
+        "horizon_s": 604800,
+        "status": "open",
+        "reason": null,
+        "resolved_at": null,
+        "exit": null,
+        "return_pct": null
+      },
+      "expected": {
+        "codes": ["bad_levels"]
+      }
+    },
+    {
+      "name": "bad_levels_inverted_sell",
+      "row": {
+        "id": "s1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "TSLA",
+        "side": "sell",
+        "amount": 1,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 94,
+        "target": 103,
+        "horizon_s": 604800,
+        "status": "open",
+        "reason": null,
+        "resolved_at": null,
+        "exit": null,
+        "return_pct": null
+      },
+      "expected": {
+        "codes": ["bad_levels"]
+      }
+    },
+    {
+      "name": "bad_row_side",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "long",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "open",
+        "reason": null,
+        "resolved_at": null,
+        "exit": null,
+        "return_pct": null
+      },
+      "expected": {
+        "codes": ["bad_row"]
+      }
+    },
+    {
+      "name": "bad_row_entry",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": "100",
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "open",
+        "reason": null,
+        "resolved_at": null,
+        "exit": null,
+        "return_pct": null
+      },
+      "expected": {
+        "codes": ["bad_row"]
+      }
+    },
+    {
+      "name": "warning_level_bounds",
+      "note": "Implied stop of 60% is outside the app's 0.2–50% range.",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 40,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "open",
+        "reason": null,
+        "resolved_at": null,
+        "exit": null,
+        "return_pct": null
+      },
+      "expected": {
+        "codes": ["level_bounds"]
+      }
+    },
+    {
+      "name": "warning_unreachable_target",
+      "row": {
+        "id": "s1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "TSLA",
+        "side": "sell",
+        "amount": 1,
+        "entry": 50,
+        "reference": 99.9,
+        "stop": 75,
+        "target": -50,
+        "horizon_s": 604800,
+        "status": "open",
+        "reason": null,
+        "resolved_at": null,
+        "exit": null,
+        "return_pct": null
+      },
+      "expected": {
+        "codes": ["unreachable_target"]
+      }
+    },
+    {
+      "name": "warning_overdue",
+      "note": "Still open more than an hour after the 7-day horizon.",
+      "options": {
+        "now": 1790608401
+      },
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "open",
+        "reason": null,
+        "resolved_at": null,
+        "exit": null,
+        "return_pct": null
+      },
+      "expected": {
+        "codes": ["overdue"]
+      }
+    },
+    {
+      "name": "not_overdue_within_grace",
+      "options": {
+        "now": 1790608399
+      },
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 604800,
+        "status": "open",
+        "reason": null,
+        "resolved_at": null,
+        "exit": null,
+        "return_pct": null
+      },
+      "expected": {
+        "codes": []
+      }
+    },
+    {
+      "name": "legacy_row_defaults_to_7_days",
+      "note": "No horizon_s and no option: 7 days is assumed.",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "status": "win",
+        "reason": "expiry",
+        "resolved_at": 1790604800,
+        "exit": 102,
+        "return_pct": 2.0000000000000018
+      },
+      "expected": {
+        "codes": []
+      }
+    },
+    {
+      "name": "published_horizon_used",
+      "note": "horizon_s 3600 is published, so an expiry after 1 hour is consistent without any option.",
+      "row": {
+        "id": "s1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "TSLA",
+        "side": "sell",
+        "amount": 1,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 103,
+        "target": 94,
+        "horizon_s": 3600,
+        "status": "win",
+        "reason": "expiry",
+        "resolved_at": 1790003600,
+        "exit": 99,
+        "return_pct": 1.0000000000000009
+      },
+      "expected": {
+        "codes": []
+      }
+    },
+    {
+      "name": "published_horizon_wins_over_option",
+      "note": "The published 7-day horizon wins over options.horizonS, so an expiry after 1 hour is not consistent.",
+      "options": {
+        "horizonS": 3600
+      },
+      "row": {
+        "id": "s1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "TSLA",
+        "side": "sell",
+        "amount": 1,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 103,
+        "target": 94,
+        "horizon_s": 604800,
+        "status": "win",
+        "reason": "expiry",
+        "resolved_at": 1790003600,
+        "exit": 99,
+        "return_pct": 1.0000000000000009
+      },
+      "expected": {
+        "codes": ["not_closable"]
+      }
+    },
+    {
+      "name": "published_horizon_overdue",
+      "note": "Overdue is measured against the published horizon.",
+      "options": {
+        "now": 1790007201
+      },
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 3600,
+        "status": "open",
+        "reason": null,
+        "resolved_at": null,
+        "exit": null,
+        "return_pct": null
+      },
+      "expected": {
+        "codes": ["overdue"]
+      }
+    },
+    {
+      "name": "bad_row_horizon_zero",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": 0,
+        "status": "open",
+        "reason": null,
+        "resolved_at": null,
+        "exit": null,
+        "return_pct": null
+      },
+      "expected": {
+        "codes": ["bad_row"]
+      }
+    },
+    {
+      "name": "bad_row_horizon_string",
+      "row": {
+        "id": "b1",
+        "created_at": 1790000000,
+        "block": "23456789",
+        "symbol": "NVDA",
+        "side": "buy",
+        "amount": 100,
+        "entry": 100,
+        "reference": 99.9,
+        "stop": 97,
+        "target": 106,
+        "horizon_s": "604800",
+        "status": "open",
+        "reason": null,
+        "resolved_at": null,
+        "exit": null,
+        "return_pct": null
+      },
+      "expected": {
+        "codes": ["bad_row"]
+      }
+    }
+  ],
+  "scorecards": [
+    {
+      "name": "empty",
+      "note": "The live endpoint before any call is logged.",
+      "scorecard": {
+        "summary": {
+          "total": 0,
+          "open": 0,
+          "closed": 0,
+          "wins": 0,
+          "losses": 0,
+          "winRate": null,
+          "avgReturnPct": null
+        },
+        "suggestions": []
+      },
+      "expected": {
+        "codes": [],
+        "summaryRecomputed": true,
+        "horizonAssumed": 0
+      }
+    },
+    {
+      "name": "consistent",
+      "scorecard": {
+        "summary": {
+          "total": 2,
+          "open": 1,
+          "closed": 1,
+          "wins": 1,
+          "losses": 0,
+          "winRate": 1,
+          "avgReturnPct": 6.2000000000000055
+        },
+        "suggestions": [
+          {
+            "id": "b1",
+            "created_at": 1790000000,
+            "block": "23456789",
+            "symbol": "NVDA",
+            "side": "buy",
+            "amount": 100,
+            "entry": 100,
+            "reference": 99.9,
+            "stop": 97,
+            "target": 106,
+            "horizon_s": 604800,
+            "status": "win",
+            "reason": "tp",
+            "resolved_at": 1790000180,
+            "exit": 106.2,
+            "return_pct": 6.2000000000000055
+          },
+          {
+            "id": "b2",
+            "created_at": 1789999940,
+            "block": "23456789",
+            "symbol": "NVDA",
+            "side": "buy",
+            "amount": 100,
+            "entry": 100,
+            "reference": 99.9,
+            "stop": 97,
+            "target": 106,
+            "horizon_s": 604800,
+            "status": "open",
+            "reason": null,
+            "resolved_at": null,
+            "exit": null,
+            "return_pct": null
+          }
+        ]
+      },
+      "expected": {
+        "codes": [],
+        "summaryRecomputed": true,
+        "horizonAssumed": 0
+      }
+    },
+    {
+      "name": "summary_mismatch",
+      "scorecard": {
+        "summary": {
+          "total": 2,
+          "open": 1,
+          "closed": 1,
+          "wins": 0,
+          "losses": 1,
+          "winRate": 0,
+          "avgReturnPct": 6.2000000000000055
+        },
+        "suggestions": [
+          {
+            "id": "b1",
+            "created_at": 1790000000,
+            "block": "23456789",
+            "symbol": "NVDA",
+            "side": "buy",
+            "amount": 100,
+            "entry": 100,
+            "reference": 99.9,
+            "stop": 97,
+            "target": 106,
+            "horizon_s": 604800,
+            "status": "win",
+            "reason": "tp",
+            "resolved_at": 1790000180,
+            "exit": 106.2,
+            "return_pct": 6.2000000000000055
+          },
+          {
+            "id": "b2",
+            "created_at": 1789999940,
+            "block": "23456789",
+            "symbol": "NVDA",
+            "side": "buy",
+            "amount": 100,
+            "entry": 100,
+            "reference": 99.9,
+            "stop": 97,
+            "target": 106,
+            "horizon_s": 604800,
+            "status": "open",
+            "reason": null,
+            "resolved_at": null,
+            "exit": null,
+            "return_pct": null
+          }
+        ]
+      },
+      "expected": {
+        "codes": ["summary_mismatch"],
+        "summaryRecomputed": true,
+        "horizonAssumed": 0
+      }
+    },
+    {
+      "name": "summary_arithmetic",
+      "scorecard": {
+        "summary": {
+          "total": 2,
+          "open": 1,
+          "closed": 1,
+          "wins": 1,
+          "losses": 1,
+          "winRate": 1,
+          "avgReturnPct": 6.2000000000000055
+        },
+        "suggestions": [
+          {
+            "id": "b1",
+            "created_at": 1790000000,
+            "block": "23456789",
+            "symbol": "NVDA",
+            "side": "buy",
+            "amount": 100,
+            "entry": 100,
+            "reference": 99.9,
+            "stop": 97,
+            "target": 106,
+            "horizon_s": 604800,
+            "status": "win",
+            "reason": "tp",
+            "resolved_at": 1790000180,
+            "exit": 106.2,
+            "return_pct": 6.2000000000000055
+          },
+          {
+            "id": "b2",
+            "created_at": 1789999940,
+            "block": "23456789",
+            "symbol": "NVDA",
+            "side": "buy",
+            "amount": 100,
+            "entry": 100,
+            "reference": 99.9,
+            "stop": 97,
+            "target": 106,
+            "horizon_s": 604800,
+            "status": "open",
+            "reason": null,
+            "resolved_at": null,
+            "exit": null,
+            "return_pct": null
+          }
+        ]
+      },
+      "expected": {
+        "codes": ["summary_arithmetic", "summary_mismatch"],
+        "summaryRecomputed": true,
+        "horizonAssumed": 0
+      }
+    },
+    {
+      "name": "summary_rate_without_closed",
+      "scorecard": {
+        "summary": {
+          "total": 1,
+          "open": 1,
+          "closed": 0,
+          "wins": 0,
+          "losses": 0,
+          "winRate": 0,
+          "avgReturnPct": null
+        },
+        "suggestions": [
+          {
+            "id": "b2",
+            "created_at": 1789999940,
+            "block": "23456789",
+            "symbol": "NVDA",
+            "side": "buy",
+            "amount": 100,
+            "entry": 100,
+            "reference": 99.9,
+            "stop": 97,
+            "target": 106,
+            "horizon_s": 604800,
+            "status": "open",
+            "reason": null,
+            "resolved_at": null,
+            "exit": null,
+            "return_pct": null
+          }
+        ]
+      },
+      "expected": {
+        "codes": ["summary_arithmetic", "summary_mismatch"],
+        "summaryRecomputed": true,
+        "horizonAssumed": 0
+      }
+    },
+    {
+      "name": "list_length",
+      "note": "Summary covers 3 calls but only 2 are listed (fewer than 200).",
+      "scorecard": {
+        "summary": {
+          "total": 3,
+          "open": 2,
+          "closed": 1,
+          "wins": 1,
+          "losses": 0,
+          "winRate": 1,
+          "avgReturnPct": 6.2000000000000055
+        },
+        "suggestions": [
+          {
+            "id": "b1",
+            "created_at": 1790000000,
+            "block": "23456789",
+            "symbol": "NVDA",
+            "side": "buy",
+            "amount": 100,
+            "entry": 100,
+            "reference": 99.9,
+            "stop": 97,
+            "target": 106,
+            "horizon_s": 604800,
+            "status": "win",
+            "reason": "tp",
+            "resolved_at": 1790000180,
+            "exit": 106.2,
+            "return_pct": 6.2000000000000055
+          },
+          {
+            "id": "b2",
+            "created_at": 1789999940,
+            "block": "23456789",
+            "symbol": "NVDA",
+            "side": "buy",
+            "amount": 100,
+            "entry": 100,
+            "reference": 99.9,
+            "stop": 97,
+            "target": 106,
+            "horizon_s": 604800,
+            "status": "open",
+            "reason": null,
+            "resolved_at": null,
+            "exit": null,
+            "return_pct": null
+          }
+        ]
+      },
+      "expected": {
+        "codes": ["list_length"],
+        "summaryRecomputed": false,
+        "horizonAssumed": 0
+      }
+    },
+    {
+      "name": "duplicate_id",
+      "scorecard": {
+        "summary": {
+          "total": 2,
+          "open": 0,
+          "closed": 2,
+          "wins": 2,
+          "losses": 0,
+          "winRate": 1,
+          "avgReturnPct": 6.2000000000000055
+        },
+        "suggestions": [
+          {
+            "id": "b1",
+            "created_at": 1790000000,
+            "block": "23456789",
+            "symbol": "NVDA",
+            "side": "buy",
+            "amount": 100,
+            "entry": 100,
+            "reference": 99.9,
+            "stop": 97,
+            "target": 106,
+            "horizon_s": 604800,
+            "status": "win",
+            "reason": "tp",
+            "resolved_at": 1790000180,
+            "exit": 106.2,
+            "return_pct": 6.2000000000000055
+          },
+          {
+            "id": "b1",
+            "created_at": 1790000000,
+            "block": "23456789",
+            "symbol": "NVDA",
+            "side": "buy",
+            "amount": 100,
+            "entry": 100,
+            "reference": 99.9,
+            "stop": 97,
+            "target": 106,
+            "horizon_s": 604800,
+            "status": "win",
+            "reason": "tp",
+            "resolved_at": 1790000180,
+            "exit": 106.2,
+            "return_pct": 6.2000000000000055
+          }
+        ]
+      },
+      "expected": {
+        "codes": ["duplicate_id"],
+        "summaryRecomputed": true,
+        "horizonAssumed": 0
+      }
+    },
+    {
+      "name": "legacy_without_horizon",
+      "scorecard": {
+        "summary": {
+          "total": 2,
+          "open": 1,
+          "closed": 1,
+          "wins": 1,
+          "losses": 0,
+          "winRate": 1,
+          "avgReturnPct": 6.2000000000000055
+        },
+        "suggestions": [
+          {
+            "id": "b1",
+            "created_at": 1790000000,
+            "block": "23456789",
+            "symbol": "NVDA",
+            "side": "buy",
+            "amount": 100,
+            "entry": 100,
+            "reference": 99.9,
+            "stop": 97,
+            "target": 106,
+            "status": "win",
+            "reason": "tp",
+            "resolved_at": 1790000180,
+            "exit": 106.2,
+            "return_pct": 6.2000000000000055
+          },
+          {
+            "id": "b2",
+            "created_at": 1789999940,
+            "block": "23456789",
+            "symbol": "NVDA",
+            "side": "buy",
+            "amount": 100,
+            "entry": 100,
+            "reference": 99.9,
+            "stop": 97,
+            "target": 106,
+            "status": "open",
+            "reason": null,
+            "resolved_at": null,
+            "exit": null,
+            "return_pct": null
+          }
+        ]
+      },
+      "expected": {
+        "codes": [],
+        "summaryRecomputed": true,
+        "horizonAssumed": 2
+      },
+      "note": "An older payload without horizon_s: still checked, with the 7-day fallback; report.horizonAssumed counts these rows."
+    }
+  ]
+}
